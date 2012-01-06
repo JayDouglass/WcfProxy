@@ -55,6 +55,25 @@ namespace WcfClientIsolator.Tests
         }
 
         [Fact]
+        public void wcf_proxy_does_not_throw_communication_object_faulted_exception_when_faulted_channel_disposed()
+        {
+            // Arrange
+            Func<object> createChannel = () =>
+                ChannelFactory<IHelloWorldService>
+                    .CreateChannel(new NetTcpBinding(), new EndpointAddress(uri));
+            var factory = new WcfProxyFactory();
+            var proxy = factory.Create<IDisposableHelloWorldService>(createChannel);
+
+            Assert.Throws<FaultException>(delegate
+            {
+                using (proxy)
+                {
+                    proxy.ThrowException();
+                }
+            });
+        }
+
+        [Fact]
         public void wcf_proxy_fowards_calls_to_wcf_channel()
         {
             // Arrange
